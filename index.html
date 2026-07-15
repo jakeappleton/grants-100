@@ -624,5 +624,20 @@ $("#axConfirm").addEventListener("click",()=>{const name=$("#axName").value.trim
 /* ============ INIT ============ */
 syncToggles(); render();
 </script>
+<script>
+/* Register service worker for offline + auto-update.
+   Reloads once — and only — when a genuinely new version takes over,
+   never on first visit. In-progress workout data is saved continuously,
+   so a refresh never loses anything. */
+if ('serviceWorker' in navigator) {
+  const hadController = !!navigator.serviceWorker.controller;
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (refreshing) return; refreshing = true;
+    if (hadController) window.location.reload();
+  });
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
+</script>
 </body>
 </html>
