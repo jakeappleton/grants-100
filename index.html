@@ -69,6 +69,25 @@
   .overload-hint{display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--dim);line-height:1.45;background:var(--cool-dim);border:1px solid rgba(47,212,168,.25);border-radius:10px;padding:10px 12px;margin-bottom:12px}
   .overload-hint b{color:var(--cool)}
   .overload-hint .bolt{color:var(--cool);font-size:14px;line-height:1.3}
+
+  .daytabs{display:flex;gap:6px;margin-bottom:12px}
+  .daytabs button{flex:1;position:relative;background:var(--surface);border:1px solid var(--line);color:var(--dim);border-radius:10px;padding:11px 4px;font-family:'Archivo';font-weight:700;font-size:12px;letter-spacing:.03em;text-transform:uppercase;cursor:pointer;transition:.12s}
+  .daytabs button:hover{color:var(--text)}
+  .daytabs button.on{color:var(--text);border-color:var(--dim);background:var(--surface-2)}
+  .daytabs button .dot{position:absolute;top:6px;right:7px;width:6px;height:6px;border-radius:50%;background:var(--hot)}
+  .progbtn{background:none;border:1px solid var(--line);color:var(--dim);border-radius:7px;padding:4px 8px;font-size:10px;font-family:'Archivo';font-weight:700;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;transition:.12s;white-space:nowrap}
+  .progbtn:hover{color:var(--cool);border-color:var(--cool)}
+  .preview-note{font-size:12px;color:var(--dim);background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:11px 12px;margin-bottom:12px;line-height:1.5}
+  .pv{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 15px;margin-bottom:9px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+  .pv-name{font-weight:700;font-size:15px;line-height:1.2}
+  .pv-meta{font-size:12px;color:var(--dim);margin-top:3px}
+  .pv-meta .fail{color:var(--hot);font-weight:600}
+  .pv-last{font-size:11px;color:var(--dim);margin-top:7px}
+  .pv-last b{color:var(--text);font-family:'Space Mono';font-weight:700}
+  .pv-last .first{color:var(--cool)}
+  .pv-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex:0 0 auto}
+  .pv-rest{font-size:11px;color:var(--dim);border:1px solid var(--line);border-radius:20px;padding:4px 9px;white-space:nowrap}
+  .pv-rest b{color:var(--text);font-family:'Space Mono'}
   .focus{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin:0 4px 12px}
 
   .ex{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 15px;margin-bottom:10px}
@@ -141,7 +160,7 @@
   .ring .clock{position:absolute;inset:0;display:grid;place-items:center;font-family:'Space Mono';font-size:52px;font-weight:700}
   .timer.over .ring .clock{color:var(--cool)}
   .tbtns{display:flex;gap:12px}
-  .tbtn{background:var(--surface);border:1px solid var(--line);color:var(--text);border-radius:11px;padding:13px 22px;font-family:'Archivo';font-weight:700;font-size:13px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:.15s}
+  .tbtn{background:var(--surface);border:1px solid var(--line);color:var(--text);border-radius:11px;padding:13px 16px;font-family:'Archivo';font-weight:700;font-size:13px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;transition:.15s}
   .tbtn:hover{border-color:var(--dim)}
   .tbtn.primary{background:var(--cool);border-color:var(--cool);color:#07110D}
 
@@ -235,14 +254,18 @@
 </section>
 
 <div id="main">
+  <div class="daytabs" id="dayTabs"></div>
   <div class="up">
-    <div><div class="k">Next up</div><div class="split" id="splitTag">PULL</div><div class="rot" id="rotLine"></div></div>
-    <div class="num"><small>Workout</small><span id="woNum">#1</span></div>
+    <div><div class="k" id="upK">Next up</div><div class="split" id="splitTag">PULL</div><div class="rot" id="rotLine"></div></div>
+    <div class="num"><small id="woLabel">Workout</small><span id="woNum">#1</span></div>
   </div>
-  <div class="overload-hint"><span class="bolt">▲</span><div>Beat last time to get stronger: <b>add a rep</b>, <b>add weight</b>, or both. Any one counts as a win.</div></div>
-  <div class="focus" id="focusLine"></div>
-  <div id="exList"></div>
-  <button class="addex" id="addExBtn">＋ Add exercise</button>
+  <div id="activeWrap">
+    <div class="overload-hint"><span class="bolt">▲</span><div>Beat last time to get stronger: <b>add a rep</b>, <b>add weight</b>, or both. Any one counts as a win.</div></div>
+    <div class="focus" id="focusLine"></div>
+    <div id="exList"></div>
+    <button class="addex" id="addExBtn">＋ Add exercise</button>
+  </div>
+  <div id="previewWrap" style="display:none"></div>
 </div>
 
 <button class="finish" id="finishBtn"></button>
@@ -258,7 +281,7 @@
     </svg>
     <div class="clock mono" id="tClock">2:00</div>
   </div>
-  <div class="tbtns"><button class="tbtn" id="tAdd">+15s</button><button class="tbtn primary" id="tDone">Done</button></div>
+  <div class="tbtns"><button class="tbtn" id="tSub">−15s</button><button class="tbtn" id="tAdd">+15s</button><button class="tbtn primary" id="tDone">Done</button></div>
 </div>
 
 <!-- progress -->
@@ -356,22 +379,28 @@ function fmtNum(n){return String(n);}
 function fmtInt(n){return Math.round(n).toLocaleString();}
 function todayIndex(){return Math.max(0,dayDiff(state.start,todayISO()));}
 function dayNumber(){return todayIndex()+1;}
-function nextSplitName(){return CYCLE[state.log.length % CYCLE.length];}
+function nextSplitName(){
+  if(state.log.length){const last=state.log[state.log.length-1].split; const i=CYCLE.indexOf(last); if(i>=0) return CYCLE[(i+1)%CYCLE.length];}
+  return CYCLE[state.log.length % CYCLE.length];
+}
 function weekOfIndex(i){return Math.floor(i/7);}
 function workoutsThisWeek(){const wk=weekOfIndex(todayIndex());const days=new Set();
   state.log.forEach(e=>{const di=dayDiff(state.start,e.date); if(weekOfIndex(di)===wk) days.add(di);});return days.size;}
 function historyArr(name){let h=state.history[name]; if(!h)h=state.history[name]=[]; else if(!Array.isArray(h))h=state.history[name]=[h]; return h;}
 function lastFor(name){const h=state.history[name]; if(!h)return null; const a=Array.isArray(h)?h:[h]; return a.length?a[a.length-1]:null;}
 
+function buildSessionFor(split){
+  const src=SPLITS[split];
+  state.session={split, ex: src.ex.map(e=>({name:e.name,reps:e.reps,rest:e.rest,base:true,baseSets:e.sets,
+    sets:Array.from({length:e.sets},()=>({done:false,w:"",r:""}))}))};
+  save(); return state.session;
+}
 function getSession(){
   if(state.session){
     state.session.ex.forEach(ex=>{ex.sets=ex.sets.map(s=>(s&&typeof s==="object")?{done:!!s.done,w:s.w||"",r:s.r||""}:{done:!!s,w:"",r:""});});
     return state.session;
   }
-  const split=nextSplitName(); const src=SPLITS[split];
-  state.session={split, ex: src.ex.map(e=>({name:e.name,reps:e.reps,rest:e.rest,base:true,baseSets:e.sets,
-    sets:Array.from({length:e.sets},()=>({done:false,w:"",r:""}))}))};
-  save(); return state.session;
+  return buildSessionFor(nextSplitName());
 }
 
 function beatState(w,r,last){
@@ -397,16 +426,56 @@ function render(){
   for(let i=0;i<WINDOW;i++){const c=document.createElement("div");c.className="cell";
     if(doneIdx.has(i))c.classList.add("done");else if(i>ti)c.classList.add("future"); if(i===ti)c.classList.add("today"); cal.appendChild(c);}
   if(finished){renderDone();return;}
-  renderWorkout();
+  renderMain();
 }
 function renderDone(){
   $("#main").innerHTML='<div class="done-screen"><div class="big">100 / 100</div><p>The window\'s closed — '+state.log.length+' workouts in the books.<br>Open Settings to start a fresh 100 days.</p></div>';
   $("#finishBtn").style.display="none";
 }
+let viewSplit=null;
+function renderTabs(active){
+  $("#dayTabs").innerHTML=CYCLE.map(sp=>{
+    const on=sp===viewSplit?' on':''; const dot=sp===active?'<span class="dot"></span>':'';
+    return `<button data-tab="${sp}" class="${on.trim()}">${sp[0]+sp.slice(1).toLowerCase()}${dot}</button>`;
+  }).join('');
+}
+function renderMain(){
+  const active=getSession().split;
+  if(!viewSplit) viewSplit=active;
+  renderTabs(active);
+  const preview = viewSplit!==active;
+  $("#activeWrap").style.display = preview?'none':'';
+  $("#previewWrap").style.display = preview?'':'none';
+  $("#upK").textContent = preview?'Preview':'Next up';
+  if(preview) renderPreview(viewSplit); else { $("#woLabel").textContent='Workout'; renderWorkout(); }
+}
+function renderPreview(split){
+  const data=SPLITS[split]; const active=getSession().split;
+  $("#splitTag").textContent=split; $("#woLabel").textContent=''; $("#woNum").textContent='';
+  $("#rotLine").textContent="viewing — not today's lift";
+  let html=`<div class="preview-note">This is what <b style="color:var(--text)">${split}</b> day looks like, with your last numbers. You're set to train <b style="color:var(--cool)">${active}</b> next — tap the button below if you'd rather do this one today.</div>`;
+  data.ex.forEach(ex=>{
+    const L=lastFor(ex.name); const restTxt=ex.rest>=120?"2:00":"1:30";
+    const last=(L&&L.sets.length)?'Last: <b>'+L.sets.map(x=>fmtNum(x.w)+"×"+fmtNum(x.r)).join(" · ")+'</b> '+relDate(L.date):'<span class="first">Not logged yet</span>';
+    html+=`<div class="pv"><div><div class="pv-name">${ex.name}</div>
+      <div class="pv-meta">${ex.sets} × <span class="fail">to failure</span>${ex.reps?' · '+ex.reps+' reps':''}</div>
+      <div class="pv-last">${last}</div></div>
+      <div class="pv-right"><div class="pv-rest">rest <b>${restTxt}</b></div><button class="progbtn" data-prog="${ex.name}">↗ Progress</button></div></div>`;
+  });
+  $("#previewWrap").innerHTML=html;
+  const fb=$("#finishBtn"); fb.style.display=""; fb.innerHTML='Do '+split+' today <span class="prog">switch</span>';
+}
+function switchActive(split){
+  const s=state.session;
+  const hasData=s && s.ex.some(ex=>ex.sets.some(st=>st.w||st.r||st.done));
+  if(hasData && s.split!==split){ if(!confirm("Switch today's workout to "+split+"? Sets you've entered on "+s.split+" will be cleared.")) return; }
+  buildSessionFor(split); viewSplit=split; save(); renderMain(); window.scrollTo({top:0,behavior:"smooth"});
+}
+function openProgressFor(name){ progEx=name; renderProgress(); $("#progSheet").classList.add("show"); }
 function renderWorkout(){
   const s=getSession(); const data=SPLITS[s.split]; const unit=state.opts.unit;
   $("#splitTag").textContent=s.split; $("#woNum").textContent="#"+(state.log.length+1);
-  const pos=state.log.length%4; const order=[]; for(let i=1;i<=3;i++) order.push(CYCLE[(pos+i)%4]);
+  const pos=CYCLE.indexOf(s.split); const order=[]; for(let i=1;i<=3;i++) order.push(CYCLE[(pos+i)%4]);
   $("#rotLine").textContent="then "+order.map(x=>x[0]+x.slice(1).toLowerCase()).join(" · ");
   $("#focusLine").textContent=data.focus;
   const list=$("#exList"); list.innerHTML="";
@@ -435,7 +504,7 @@ function renderWorkout(){
     card.innerHTML=`<div class="ex-head"><div><div class="ex-name">${ex.name}${ex.base?'':'<span class="tagx">added</span>'}</div>
         <div class="ex-meta">${ex.sets.length} × <span class="fail">to failure</span>${ex.reps?' · '+ex.reps+' reps':''}</div>
         <div class="ex-last">${lastLine}</div></div>
-      <div class="ex-right"><div class="rest-chip">rest <b>${restTxt}</b></div>${ex.base?'':'<button class="rm-ex" data-rm="'+ei+'" title="Remove">✕</button>'}</div></div>
+      <div class="ex-right"><div class="rest-chip">rest <b>${restTxt}</b></div><button class="progbtn" data-prog="${ex.name}">↗</button>${ex.base?'':'<button class="rm-ex" data-rm="'+ei+'" title="Remove">✕</button>'}</div></div>
       <div class="sets">${setsHtml}</div>
       <div class="setctl"><button data-addset="${ei}">＋ Set</button><button data-rmset="${ei}" ${canRemove?'':'disabled'}>– Set</button></div>`;
     list.appendChild(card);
@@ -458,6 +527,8 @@ $("#exList").addEventListener("input",e=>{const inp=e.target.closest("input[data
   s.ex[ei].sets[si][f]=inp.value; save(); updateBeat(ei,si);});
 $("#exList").addEventListener("click",e=>{
   const s=getSession();
+  const prog=e.target.closest("[data-prog]");
+  if(prog){ openProgressFor(prog.dataset.prog); return; }
   const done=e.target.closest("[data-donebtn]");
   if(done){const ei=+done.dataset.ex,si=+done.dataset.set; const st=s.ex[ei].sets[si]; st.done=!st.done; save(); renderWorkout();
     if(st.done&&state.opts.auto) startTimer(+done.dataset.rest); return;}
@@ -469,6 +540,8 @@ $("#exList").addEventListener("click",e=>{
   if(rmex){s.ex.splice(+rmex.dataset.rm,1); save(); renderWorkout(); return;}
 });
 $("#finishBtn").addEventListener("click",()=>{
+  const active=getSession().split;
+  if(viewSplit && viewSplit!==active){ switchActive(viewSplit); return; }
   const s=getSession(); let beat=0,comparable=0,totalVol=0,doneSets=0;
   s.ex.forEach(ex=>{
     const L=lastFor(ex.name);
@@ -481,12 +554,15 @@ $("#finishBtn").addEventListener("click",()=>{
     if(logged.length){historyArr(ex.name).push({date:todayISO(),sets:logged});}
   });
   state.log.push({date:todayISO(),split:s.split,sets:doneSets,volume:Math.round(totalVol),beats:beat,comparable});
-  const split=s.split; state.session=null; save(); render();
+  const split=s.split; state.session=null; viewSplit=null; save(); render();
   window.scrollTo({top:0,behavior:"smooth"});
   showToast(comparable===0? split+" logged — baseline set. Beat it next time." : split+" logged — beat "+beat+" of "+comparable+" sets 💪");
 });
 let toastT=null;
 function showToast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("show"),3400);}
+
+$("#dayTabs").addEventListener("click",e=>{const b=e.target.closest("[data-tab]"); if(!b)return; viewSplit=b.dataset.tab; renderMain(); window.scrollTo({top:0,behavior:"smooth"});});
+$("#previewWrap").addEventListener("click",e=>{const p=e.target.closest("[data-prog]"); if(p) openProgressFor(p.dataset.prog);});
 
 /* ============ PROGRESS ============ */
 let progEx=null, progMetric="e1rm";
@@ -577,8 +653,14 @@ function startTimer(sec){clearInterval(tId);tTotal=sec;tRemain=sec;const t=$("#t
   $("#tLbl").textContent="Rest";$("#tClock").textContent=fmt(tRemain);drawArc();t.classList.add("show");tId=setInterval(tick,1000);}
 function onEnd(){$("#timer").classList.add("over");$("#tLbl").textContent="Go — next set";if(state.opts.beep)beep();}
 $("#tDone").addEventListener("click",()=>{clearInterval(tId);tId=null;$("#timer").classList.remove("show","over");});
-$("#tAdd").addEventListener("click",()=>{tRemain+=15;tTotal=Math.max(tTotal,tRemain);$("#timer").classList.remove("over");
-  $("#tLbl").textContent="Rest";$("#tClock").textContent=fmt(tRemain);drawArc();if(!tId)tId=setInterval(tick,1000);});
+function adjustTimer(delta){
+  tRemain=Math.max(0,tRemain+delta); tTotal=Math.max(tTotal,tRemain);
+  if(tRemain<=0){ clearInterval(tId); tId=null; $("#tClock").textContent=fmt(0); drawArc(); onEnd(); return; }
+  $("#timer").classList.remove("over"); $("#tLbl").textContent="Rest";
+  $("#tClock").textContent=fmt(tRemain); drawArc(); if(!tId) tId=setInterval(tick,1000);
+}
+$("#tAdd").addEventListener("click",()=>adjustTimer(15));
+$("#tSub").addEventListener("click",()=>adjustTimer(-15));
 function beep(){try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==="suspended")audioCtx.resume();
   [0,0.18].forEach(off=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.frequency.value=880;o.type="sine";
   o.connect(g);g.connect(audioCtx.destination);const t0=audioCtx.currentTime+off;
@@ -600,8 +682,8 @@ function syncToggles(){$("#autoToggle").classList.toggle("on",state.opts.auto);$
   $("#unitLb").classList.toggle("on",state.opts.unit==="lb");$("#unitKg").classList.toggle("on",state.opts.unit==="kg");}
 $("#autoToggle").addEventListener("click",()=>{state.opts.auto=!state.opts.auto;save();syncToggles();});
 $("#beepToggle").addEventListener("click",()=>{state.opts.beep=!state.opts.beep;save();syncToggles();if(state.opts.beep)beep();});
-$("#unitLb").addEventListener("click",()=>{state.opts.unit="lb";save();syncToggles();renderWorkout();});
-$("#unitKg").addEventListener("click",()=>{state.opts.unit="kg";save();syncToggles();renderWorkout();});
+$("#unitLb").addEventListener("click",()=>{state.opts.unit="lb";save();syncToggles();renderMain();});
+$("#unitKg").addEventListener("click",()=>{state.opts.unit="kg";save();syncToggles();renderMain();});
 $("#resetBtn").addEventListener("click",()=>{if(confirm("Reset the 100-day window? Wipes all logged workouts and lift history, and starts today over as Day 1.")){
   const opts=state.opts; mem=fresh(); mem.opts=opts; state=mem; save(); location.reload();}});
 
